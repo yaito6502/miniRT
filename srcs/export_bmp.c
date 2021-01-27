@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/25 15:25:39 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/27 00:03:46 by yaito            ###   ########.fr       */
+/*   Updated: 2021/01/27 22:07:56 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,24 +16,19 @@
 #define FILE_HEADER_SIZE 14
 #define INFO_HEADER_SIZE 40
 
-void	write_bmpfile_iterate(t_env *env, t_img *img, char *filename)
+void	write_bmpfile_iterate(t_env *env, char *filename)
 {
 	size_t	cam_index;
-	char	file_index[2];
 
 	cam_index = 0;
 	while (cam_index < env->count.c)
 	{
-		file_index[0] = cam_index + '0';
-		file_index[1] = '\0';
-		if ((filename = ft_strjoin(filename, file_index)) == NULL)
-			error(strerror(errno));
-		write_bmpfile(filename, &img[cam_index++], &env->resolution);
-		SAFE_FREE(filename);
+		write_bmpfile(filename, &env->img[cam_index], &env->resolution, cam_index);
+		cam_index++;
 	}
 }
 
-void	write_bmpfile(const char *filename, t_img *img, t_reso *reso)
+void	write_bmpfile(const char *filename, t_img *img, t_reso *reso, size_t index)
 {
 	int						fd;
 	static char				*bmp_file;
@@ -43,11 +38,11 @@ void	write_bmpfile(const char *filename, t_img *img, t_reso *reso)
 
 	if (!filename || !img || !reso)
 		error(strerror(EINVAL));
-	if ((bmp_file = get_path("./bmp_files/", (char*)filename, ".bmp")) == NULL)
+	if ((bmp_file = get_path("./bmp_files/", (char*)filename, index, ".bmp")) == NULL)
 		error(strerror(errno));
 	if ((fd = open(bmp_file, O_WRONLY | O_CREAT, S_IREAD | S_IWRITE)) == ERROR)
 		error(strerror(errno));
-	SAFE_FREE(bmp_file);
+	safe_free(bmp_file);
 	header_buf[0] = 0x42;
 	header_buf[1] = 0x4D;
 	set_header(file, info, img, reso);
@@ -61,13 +56,21 @@ void	write_bmpfile(const char *filename, t_img *img, t_reso *reso)
 	close(fd);
 }
 
-char	*get_path(const char *new_path, char *filepath, const char *new_extension)
+char	*get_path(char *new_path, char *filepath, size_t index, const char *new_extension)
 {
 	char			*new_file;
 	char			*file_name;
 	char			*offset;
+	char			*index_name;
 	size_t			len;
 
+	if ((index_name = ft_itoa(index)) == NULL)
+		return (NULL);
+	if ((new_path = ft_strjoin(new_path, index_name)) == NULL)
+	{
+		safe_free(index_name);
+		return (NULL);
+	}
 	file_name = ft_strrchr(filepath, '/');
 	file_name = (file_name == NULL ? filepath : file_name + 1);
 	offset = ft_strrchr(file_name, '.');
@@ -78,7 +81,8 @@ char	*get_path(const char *new_path, char *filepath, const char *new_extension)
 	ft_strlcpy(new_file, new_path, len);
 	ft_strlcat(new_file, file_name, len);
 	ft_strlcpy(new_file + ft_strlen(new_file) - ft_strlen(offset), new_extension, len);
-	printf("%s\n", new_file);
+	safe_free(new_path);
+	safe_free(index_name);
 	return (new_file);
 }
 
@@ -100,7 +104,6 @@ void	set_header(t_file *file, t_info *info, t_img *img, t_reso *reso)
 	info->colorimp = 0;
 }
 
-//これを呼ぶとなぜかbmpが真っ暗(全て0)になる
 void	my_mlx_pixel_write(t_img *img, int x, int y, unsigned char *row)
 {
 	unsigned int color;
@@ -134,10 +137,10 @@ int		write_image_to_bmp(int fd, t_img *img, t_reso *reso)
 		}
 		if (write(fd, buf, img->line_length) == ERROR)
 		{
-			SAFE_FREE(buf);
+			safe_free(buf);
 			return (ERROR);
 		}
 	}
-	SAFE_FREE(buf);
+	safe_free(buf);
 	return (END);
 }

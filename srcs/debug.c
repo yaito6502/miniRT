@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/23 23:09:53 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/23 23:20:19 by yaito            ###   ########.fr       */
+/*   Updated: 2021/01/27 04:19:36 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ void	print_color(t_rgb *color)
 
 void	print_environment(t_env *env)
 {
+	printf("count : ");
+	printf("c[%ld] l[%ld] sp[%ld] pl[%ld] sq[%ld] cy[%ld] tr[%ld]\n", env->count.c, env->count.l, env->count.sp, env->count.pl, env->count.sq, env->count.cy, env->count.tr);
 	printf("resolution : ");
 	printf("width[%d] ", env->resolution.width);
 	printf("height[%d]\n", env->resolution.height);

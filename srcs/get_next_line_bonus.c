@@ -6,11 +6,10 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/29 02:33:58 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/23 23:20:22 by yaito            ###   ########.fr       */
+/*   Updated: 2021/01/27 05:19:15 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/get_next_line_bonus.h"
 #include "../includes/minirt.h"
 
 int		buf_split(int rval, char **line, char **buf)

@@ -6,13 +6,13 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/23 23:26:17 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/26 23:57:21 by yaito            ###   ########.fr       */
+/*   Updated: 2021/01/28 00:47:40 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minirt.h"
 
-void	raytrace_iterate(t_env *env, t_img *imgs)
+void	raytrace_iterate(t_env *env)
 {
 	size_t	cam_index;
 
@@ -20,12 +20,12 @@ void	raytrace_iterate(t_env *env, t_img *imgs)
 	while (cam_index < env->count.c)
 	{
 		set_screen_base(&env->camera[cam_index], &env->resolution);
-		pixel_put(env, &imgs[cam_index], cam_index);
+		pixel_put(env, cam_index);
 		cam_index++;
 	}
 }
 
-void	pixel_put(t_env *env, t_img *img, size_t cam_index)
+void	pixel_put(t_env *env, size_t cam_index)
 {
 	int		x;
 	int		y;
@@ -44,9 +44,10 @@ void	pixel_put(t_env *env, t_img *img, size_t cam_index)
 			ray = get_ray(&env->camera[cam_index], &uv[0], &uv[1]);
 			hit = intersect(env, &ray, DBL_MAX);
 			if (hit.t == DBL_MAX)
-				my_mlx_pixel_put(img, x++, y, convert_rgb_to_color(hit.color.r, hit.color.g, hit.color.b));
+				my_mlx_pixel_put(&env->img[cam_index], x, y, convert_rgb_to_color(hit.color.r, hit.color.g, hit.color.b));
 			else
-				my_mlx_pixel_put(img, x++, y, reflection(env, &ray, &hit));
+				my_mlx_pixel_put(&env->img[cam_index], x, y, reflection(env, &ray, &hit));
+			x++;
 		}
 		y++;
 	}
@@ -56,6 +57,7 @@ void	my_mlx_pixel_put(t_img *data, int x, int y, int color)
 {
 	char	*dst;
 
+	//printf("my[%p] addr[%p] line[%d] bpp[%d]\n", data, &data->addr, data->line_length, data->bits_per_pixel);
 	dst = data->addr + (y * data->line_length + x * (data->bits_per_pixel / 8));
 	*(unsigned int*)dst = color;
 }
@@ -65,9 +67,9 @@ t_hit	intersect(t_env *env, t_ray *ray, double max_dist)
 	t_hit	hit;
 	size_t	i;
 
-	hit.color.r = 100;
-	hit.color.g = 200;
-	hit.color.b = 234;
+	hit.color.r = BG_R;
+	hit.color.g = BG_G;
+	hit.color.b = BG_B;
 	hit.t = max_dist;
 	i = 0;
 	while (env->count.sp > i)
@@ -75,9 +77,9 @@ t_hit	intersect(t_env *env, t_ray *ray, double max_dist)
 	i = 0;
 	while (env->count.pl > i)
 		intersect_plane(&env->plane[i++], ray, &hit);
-	/*i = 0;
+	i = 0;
 	while (env->count.sq > i)
-		intersect_square(&env->square[i++], ray, &hit);*/
+		intersect_square(&env->square[i++], ray, &hit);
 	i = 0;
 	while (env->count.cy > i)
 		intersect_cylinder(&env->cylinder[i++], ray, &hit);

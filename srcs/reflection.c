@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/23 23:30:16 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/26 23:01:31 by yaito            ###   ########.fr       */
+/*   Updated: 2021/01/28 03:03:20 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,9 +84,8 @@ int		reflection(t_env *env, t_ray *ray, t_hit *hit)
 	i = 0;
 	while (env->count.l > i)
 	{
-		l = vec3_tovec3_fourope(env->light[i].point, '-', get_ray_at(ray, hit->t));
-		l = vec3_normalize(l);
-		if (shadowing(env, ray, hit, &l))
+		l = vec3_normalize(vec3_tovec3_fourope(env->light[i].point, '-', get_ray_at(ray, hit->t)));
+		if (shadowing(env, ray, hit, &l) && ++i)
 			continue ;
 		r_d = culc_rd(&env->light[i], hit, &l);
 		r_s = culc_rs(&env->light[i++], ray, hit, &l);

@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/21 03:59:13 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/23 23:20:41 by yaito            ###   ########.fr       */
+/*   Updated: 2021/01/27 05:06:47 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,10 +86,10 @@ void	free_params(char **params)
 	i = 0;
 	while (params[i] != NULL)
 	{
-		SAFE_FREE(params[i]);
+		safe_free(params[i]);
 		i++;
 	}
-	SAFE_FREE(params);
+	safe_free(params);
 }
 
 size_t	get_memcount(char **params)

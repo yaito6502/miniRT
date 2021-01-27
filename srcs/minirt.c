@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/21 04:05:52 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/27 02:23:34 by yaito            ###   ########.fr       */
+/*   Updated: 2021/01/27 06:30:06 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,6 @@ int		error(char *message)
 
 void	init_environment(t_env *env)
 {
-	//size_t	cam_index;
-
 	if ((env->camera = malloc(sizeof(t_cam) * env->count.c)) == NULL)
 		error(strerror(errno));
 	if ((env->light = malloc(sizeof(t_light) * env->count.l)) == NULL)
@@ -38,38 +36,33 @@ void	init_environment(t_env *env)
 		error(strerror(errno));
 	if ((env->triangle = malloc(sizeof(t_tr) * env->count.tr)) == NULL)
 		error(strerror(errno));
-	/*if ((imgs = malloc(sizeof(t_img*) * env->count.c)) == NULL)
+	if ((env->img = malloc(sizeof(t_img) * env->count.c)) == NULL)
 		error(strerror(errno));
-	cam_index = 0;
-	while (cam_index < env->count.c)
-	{
-		if ((imgs[cam_index++] = malloc(sizeof(t_img))) == NULL)
-			error(strerror(errno));
-	}*/
 }
 
-void	set_mlx(t_env *env, t_img **imgs, void *mlx, void *mlx_win)
+void	set_mlx(t_env *env, void **mlx, void **mlx_win)
 {
 	int		x;
 	int		y;
 	size_t	cam_index;
 	t_img	*img;
 
-	mlx = mlx_init();
-	mlx_get_screen_size(mlx, &x, &y);
+	*mlx = mlx_init();
+	mlx_get_screen_size(*mlx, &x, &y);
 	env->resolution.width = MIN(x, env->resolution.width);
 	env->resolution.height = MIN(y, env->resolution.height);
-	mlx_win = mlx_new_window(mlx, env->resolution.width, env->resolution.height, "miniRT");
+	*mlx_win = mlx_new_window(*mlx, env->resolution.width, env->resolution.height, "miniRT");
 	cam_index = 0;
 	while (cam_index < env->count.c)
 	{
-		img = imgs[cam_index++];
-		img->img = mlx_new_image(mlx, env->resolution.width, env->resolution.height);
-		img->addr = mlx_get_data_addr(&img->img, &img->bits_per_pixel, &img->line_length, &img->endian);
+		img = &env->img[cam_index++];
+		img->img = mlx_new_image(*mlx, env->resolution.width, env->resolution.height);
+		img->addr = mlx_get_data_addr(img->img, &img->bits_per_pixel, &img->line_length, &img->endian);
+		//printf("img[%p] addr[%p]\n", img->img, img->addr);
 		if (!img->img || !img->addr)
 			error("failed img setting");
 	}
-	if (!mlx || !mlx_win)
+	if (!*mlx || !*mlx_win)
 		error("failed mlx setting");
 }
 
@@ -97,28 +90,28 @@ void	set_screen_base(t_cam *cam, t_reso *reso)
 
 int		main(int argc, char **argv)
 {
-	//void			*mlx;
-	//void			*mlx_win;
-	//t_img			**imgs;
+	void			*mlx;
+	void			*mlx_win;
 	static t_env	env = {0};
 
 	if (argc <= 1 || argc >= 4 || !ENDSWITH(argv[1], ".rt"))
 		error("Does not follow the input format [./miniRT *.rt]");
 	if (argc == 3 && ft_strncmp(argv[2], "--save", 7))
 		error("Does not follow the input format [./miniRT *.rt --save]");
-	//mlx = NULL;
-	//mlx_win = NULL;
-	//imgs = NULL;
+	mlx = NULL;
+	mlx_win = NULL;
 	readrtfile(argv[1], &env, &environment_check);
 	init_environment(&env);
 	readrtfile(argv[1], &env, &set_environment);
-	print_environment(&env);
-	//set_mlx(&env, imgs, mlx, mlx_win);
-	//raytrace_iterate(&env, imgs);
-	/*if (argc == 3)
-		write_bmpfile_iterate(&env, imgs, argv[1]);
+	set_mlx(&env, &mlx, &mlx_win);
+	print_environment(&env); //
+	raytrace_iterate(&env);
+	if (argc == 3)
+		write_bmpfile_iterate(&env, argv[1]);
 	else
-		mlx_put_image_to_window(mlx, mlx_win, imgs->img, 0, 0);*/
-	//mlx_loop(mlx);
+	{
+		mlx_put_image_to_window(mlx, mlx_win, env.img[0].img, 0, 0);
+		mlx_loop(mlx);
+	}
 	exit(EXIT_SUCCESS);
 }

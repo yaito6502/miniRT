@@ -11,6 +11,7 @@ SRCSNAME =	minirt.c \
 			set_objects.c \
 			set_space.c \
 			get_next_line_bonus.c \
+			export_bmp.c \
 			vector3.c \
 			debug.c
 
@@ -31,7 +32,7 @@ $(NAME) : $(OBJS)
 	$(CC) $(CFLAGS) $(DEBUG) $(OBJS) -L. -lm -lft -lmlx_Linux -lXext -lX11 -o $(NAME)
 
 clean :
-	$(RM) $(OBJS) libft.a libmlx_Linux.a
+	$(RM) $(OBJS) libft.a libmlx.a
 	make clean -C ./includes/libft
 	make clean -C ./includes/minilibx-linux
 

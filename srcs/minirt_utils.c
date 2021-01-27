@@ -6,12 +6,23 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/21 04:02:37 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/27 01:52:08 by yaito            ###   ########.fr       */
+/*   Updated: 2021/01/27 05:18:06 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/libft/libft.h"
 #include "../includes/minirt.h"
+
+void	safe_free(void *ptr)
+{
+	free(ptr);
+	ptr = NULL;
+}
+
+void	*safe_free_rtn(void *ptr)
+{
+	safe_free(ptr);
+	return (NULL);
+}
 
 double	ft_atof(const char *str)
 {
@@ -51,12 +62,13 @@ void	readrtfile(char *filename, t_env *env, void (*set)(t_env *, char **))
 	{
 		if (result == ERROR || ((params = ft_split(line, ' '))) == NULL)
 			error(strerror(errno));
+		printf("line[%s]\n", line);
 		(*set)(env, params);
 		free_params(params);
 		if (result == END)
 			break ;
 		else
-			SAFE_FREE(line);
+			safe_free(line);
 	}
 	close(fd);
 }

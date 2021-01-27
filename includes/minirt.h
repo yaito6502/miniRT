@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/19 07:44:07 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/27 02:23:11 by yaito            ###   ########.fr       */
+/*   Updated: 2021/01/28 03:07:22 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,9 +41,11 @@
 # define VEC3_MEMCOUNT	3
 # define RGB_MEMCOUNT	3
 # define SPEC			0.3
-# define SHININESS		20
-# define EPSILON		1 / 512
-# define BG_COLOR		0x00000000
+# define SHININESS		8
+# define EPSILON		0.001953125
+# define BG_R	140
+# define BG_G	200
+# define BG_B	230
 # define VUP (vec3_new(0, 1, 0))
 # define STARTSWITH(STR, STARTS) (!ft_strncmp(STR, STARTS, ft_strlen(STARTS) + 1))
 # define ENDSWITH(S,E) (!ft_strncmp(S+(ft_strlen(S)-ft_strlen(E)),E,ft_strlen(E)+1))
@@ -186,6 +188,7 @@ typedef	struct		s_environment
 	t_sq			*square;
 	t_cy			*cylinder;
 	t_tr			*triangle;
+	t_img			*img;
 	t_count			count;
 }					t_env;
 
@@ -243,7 +246,7 @@ void		set_triangle(t_tr *triangle, char **params);
 void		set_screen_base(t_cam *cam, t_reso *reso);
 
 void		init_environment(t_env *env);
-void		set_mlx(t_env *env, t_img **img, void *mlx, void *mlx_win);
+void		set_mlx(t_env *env, void **mlx, void **mlx_win);
 
 /*vector3_functions*/
 t_vec3		vec3_new(double x, double y, double z);
@@ -255,8 +258,8 @@ double		vec3_dot(t_vec3 a, t_vec3 b);
 double		vec3_length(t_vec3 vec);
 
 /*raytrace_functions*/
-void		pixel_put(t_env *env, t_img *img, size_t cam_index);
-void		raytrace_iterate(t_env *env, t_img *img);
+void		pixel_put(t_env *env, size_t cam_index);
+void		raytrace_iterate(t_env *env);
 void		my_mlx_pixel_put(t_img *data, int x, int y, int color);
 t_hit		intersect(t_env *env, t_ray *ray, double max_dist);
 void		intersect_sphere(t_sp *sphere, t_ray *ray, t_hit *hit);
@@ -264,6 +267,7 @@ void		intersect_plane(t_pl *pl, t_ray *ray, t_hit *hit);
 void		intersect_square(t_sq *sq, t_ray *ray, t_hit *hit);
 void		intersect_cylinder(t_cy *cy, t_ray *ray, t_hit *hit);
 void		intersect_triangle(t_tr *tr, t_ray *ray, t_hit *hit);
+double		orthogonal(t_vec3 *base, t_vec3 *pos, t_ray *ray, double hit_t);
 t_ray		get_ray(t_cam *cam, double *x, double *y);
 
 /*reflection_functions*/
@@ -276,15 +280,17 @@ int			convert_rgb_to_color(int r, int g, int b);
 double		ft_atof(const char *str);
 void		readrtfile(char *filename, t_env *env, void (*set)(t_env *, char **));
 int			error(char *message);
+void	safe_free(void *ptr);
+void	*safe_free_rtn(void *ptr);
 
 t_vec3	get_ray_at(t_ray *ray, double t);
 
 /*bmp_functions*/
-void	write_bmpfile(const char *filename, t_img *img, t_reso *reso);
-void	set_header(t_file *file, t_info *info, t_img *img, t_reso *reso);
-int		write_image_to_bmp(int fd, t_img *img, t_reso *reso);
-void	my_mlx_pixel_write(t_img *img, int x, int y, unsigned char *row);
-char	*get_path(const char *new_path, char *filename, const char *new_extension);
-void	write_bmpfile_iterate(t_env *env, t_img *img, char *filename);
+void		write_bmpfile_iterate(t_env *env, char *filename);
+void		write_bmpfile(const char *filename, t_img *img, t_reso *reso, size_t index);
+void		set_header(t_file *file, t_info *info, t_img *img, t_reso *reso);
+int			write_image_to_bmp(int fd, t_img *img, t_reso *reso);
+void		my_mlx_pixel_write(t_img *img, int x, int y, unsigned char *row);
+char		*get_path(char *new_path, char *filename, size_t index, const char *new_extension);
 
 #endif
