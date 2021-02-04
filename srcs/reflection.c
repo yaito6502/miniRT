@@ -6,12 +6,11 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/23 23:30:16 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/28 03:03:20 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/03 23:38:10 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minirt.h"
-#include "../includes/debug.h"
 
 int		convert_rgb_to_color(int r, int g, int b)
 {
@@ -44,7 +43,8 @@ t_rgb	culc_rs(t_light *light, t_ray *ray, t_hit *hit, t_vec3 *l)
 	*l = vec3_normalize(*l);
 	v = vec3_tonum_fourope(ray->direction, '*', -1);
 	v = vec3_normalize(v);
-	r = vec3_tovec3_fourope(vec3_tonum_fourope(hit->normal, '*', 2 * vec3_dot(hit->normal, *l)), '-', *l);
+	r = vec3_tovec3_fourope(vec3_tonum_fourope(\
+		hit->normal, '*', 2 * vec3_dot(hit->normal, *l)), '-', *l);
 	r = vec3_normalize(r);
 	intensity = pow(vec3_dot(v, r), SHININESS);
 	if ((vec3_dot(hit->normal, *l) < 0) || (vec3_dot(v, r) < 0))
@@ -61,8 +61,9 @@ bool	shadowing(t_env *env, t_ray *ray, t_hit *hit, t_vec3 *l)
 	t_hit	hit_shadow;
 	double	diff;
 
-	ray_shadow.origin = vec3_tovec3_fourope(get_ray_at(ray, hit->t), '+', vec3_tonum_fourope(*l, '*', EPSILON));
-	ray_shadow.direction = *l;
+	ray_shadow.origin = vec3_tovec3_fourope(\
+		get_ray_at(ray, hit->t), '+', vec3_tonum_fourope(*l, '*', EPSILON));
+	ray_shadow.direction = vec3_normalize(*l);
 	diff = vec3_length(*l) - EPSILON;
 	hit_shadow = intersect(env, &ray_shadow, diff);
 	if (hit_shadow.t == diff)
@@ -78,13 +79,17 @@ int		reflection(t_env *env, t_ray *ray, t_hit *hit)
 	t_rgb	r_s;
 	t_rgb	color;
 
-	color.r = env->ambientlight.color.r * env->ambientlight.light * hit->color.r / 0xFF;
-	color.g = env->ambientlight.color.g * env->ambientlight.light * hit->color.g / 0xFF;
-	color.b = env->ambientlight.color.b * env->ambientlight.light * hit->color.b / 0xFF;
+	color.r = env->ambientlight.color.r * env->ambientlight.light * \
+	hit->color.r / 0xFF;
+	color.g = env->ambientlight.color.g * env->ambientlight.light * \
+	hit->color.g / 0xFF;
+	color.b = env->ambientlight.color.b * env->ambientlight.light * \
+	hit->color.b / 0xFF;
 	i = 0;
 	while (env->count.l > i)
 	{
-		l = vec3_normalize(vec3_tovec3_fourope(env->light[i].point, '-', get_ray_at(ray, hit->t)));
+		l = vec3_tovec3_fourope(\
+			env->light[i].point, '-', get_ray_at(ray, hit->t));
 		if (shadowing(env, ray, hit, &l) && ++i)
 			continue ;
 		r_d = culc_rd(&env->light[i], hit, &l);

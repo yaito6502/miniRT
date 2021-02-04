@@ -1,26 +1,29 @@
-NAME = miniRT
-SRCSNAME =	minirt.c \
-			minirt_raytrace.c \
-			minirt_utils.c \
-			intersect_objects.c \
-			reflection.c \
-			check_environment.c \
-			check_objects.c \
-			check_space.c \
-			set_environment.c \
-			set_objects.c \
-			set_space.c \
-			get_next_line_bonus.c \
-			export_bmp.c \
-			vector3.c \
-			debug.c
+NAME		= miniRT
+SRCSNAME	=	minirt.c \
+				raytrace.c \
+				minirt_utils.c \
+				intersect_objects.c \
+				reflection.c \
+				check_environment.c \
+				check_objects.c \
+				check_space.c \
+				set_environment.c \
+				set_objects.c \
+				set_space.c \
+				get_next_line_bonus.c \
+				export_bmp.c \
+				vector3.c \
+				vector3_fourope.c \
+				vector3_fourope_utils.c \
+				event.c \
+				debug.c
 
-SRCS	= $(addprefix ./srcs/, $(SRCSNAME))
-OBJS = $(SRCS:.c=.o)
-CC = gcc
-CFLAGS = -Wall -Wextra -Werror
-RM = rm -f
-DEBUG = -fsanitize=address
+SRCS		= $(addprefix ./srcs/, $(SRCSNAME))
+OBJS		= $(SRCS:.c=.o)
+CC			= gcc
+CFLAGS		= -Wall -Wextra -Werror
+RM			= rm -f
+DEBUG		= -fsanitize=address
 
 all : $(NAME)
 
@@ -32,7 +35,7 @@ $(NAME) : $(OBJS)
 	$(CC) $(CFLAGS) $(DEBUG) $(OBJS) -L. -lm -lft -lmlx_Linux -lXext -lX11 -o $(NAME)
 
 clean :
-	$(RM) $(OBJS) libft.a libmlx.a
+	$(RM) $(OBJS) libft.a libmlx_Linux.a
 	make clean -C ./includes/libft
 	make clean -C ./includes/minilibx-linux
 

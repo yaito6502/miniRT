@@ -6,15 +6,11 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/25 15:25:39 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/27 22:07:56 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/03 23:44:51 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minirt.h"
-#define FILE_TYPE 0x4D42
-#define DEFAULT_HEADER_SIZE 54
-#define FILE_HEADER_SIZE 14
-#define INFO_HEADER_SIZE 40
 
 void	write_bmpfile_iterate(t_env *env, char *filename)
 {
@@ -23,12 +19,14 @@ void	write_bmpfile_iterate(t_env *env, char *filename)
 	cam_index = 0;
 	while (cam_index < env->count.c)
 	{
-		write_bmpfile(filename, &env->img[cam_index], &env->resolution, cam_index);
+		write_bmpfile(\
+			filename, &env->img[cam_index], &env->resolution, cam_index);
 		cam_index++;
 	}
 }
 
-void	write_bmpfile(const char *filename, t_img *img, t_reso *reso, size_t index)
+void	write_bmpfile(\
+	const char *filename, t_img *img, t_reso *reso, size_t index)
 {
 	int						fd;
 	static char				*bmp_file;
@@ -38,11 +36,12 @@ void	write_bmpfile(const char *filename, t_img *img, t_reso *reso, size_t index)
 
 	if (!filename || !img || !reso)
 		error(strerror(EINVAL));
-	if ((bmp_file = get_path("./bmp_files/", (char*)filename, index, ".bmp")) == NULL)
+	if ((bmp_file = get_path(\
+		"./bmp_files/", (char*)filename, index, ".bmp")) == NULL)
 		error(strerror(errno));
 	if ((fd = open(bmp_file, O_WRONLY | O_CREAT, S_IREAD | S_IWRITE)) == ERROR)
 		error(strerror(errno));
-	safe_free(bmp_file);
+	SAFE_FREE(bmp_file);
 	header_buf[0] = 0x42;
 	header_buf[1] = 0x4D;
 	set_header(file, info, img, reso);
@@ -54,66 +53,6 @@ void	write_bmpfile(const char *filename, t_img *img, t_reso *reso, size_t index)
 	if (write_image_to_bmp(fd, img, reso) == ERROR)
 		error(strerror(errno));
 	close(fd);
-}
-
-char	*get_path(char *new_path, char *filepath, size_t index, const char *new_extension)
-{
-	char			*new_file;
-	char			*file_name;
-	char			*offset;
-	char			*index_name;
-	size_t			len;
-
-	if ((index_name = ft_itoa(index)) == NULL)
-		return (NULL);
-	if ((new_path = ft_strjoin(new_path, index_name)) == NULL)
-	{
-		safe_free(index_name);
-		return (NULL);
-	}
-	file_name = ft_strrchr(filepath, '/');
-	file_name = (file_name == NULL ? filepath : file_name + 1);
-	offset = ft_strrchr(file_name, '.');
-	offset = (offset == NULL ? NULL : offset);
-	len = ft_strlen(new_path) + ft_strlen(file_name) - ft_strlen(offset) + ft_strlen(new_extension) + 1;
-	if ((new_file = malloc(len)) == NULL)
-		return (NULL);
-	ft_strlcpy(new_file, new_path, len);
-	ft_strlcat(new_file, file_name, len);
-	ft_strlcpy(new_file + ft_strlen(new_file) - ft_strlen(offset), new_extension, len);
-	safe_free(new_path);
-	safe_free(index_name);
-	return (new_file);
-}
-
-void	set_header(t_file *file, t_info *info, t_img *img, t_reso *reso)
-{
-	file->filesize = DEFAULT_HEADER_SIZE + img->line_length * reso->height;
-	file->reserved = 0;
-	file->offbits = DEFAULT_HEADER_SIZE;
-	info->infosize = INFO_HEADER_SIZE;
-	info->img_width = reso->width;
-	info->img_height = reso->height;
-	info->planes = 1;
-	info->bitcount = img->bits_per_pixel;
-	info->compression = 0;
-	info->sizeimage = img->line_length * reso->height;
-	info->pixpermeter_x = 0;
-	info->pixpermeter_y = 0;
-	info->colorused = 0;
-	info->colorimp = 0;
-}
-
-void	my_mlx_pixel_write(t_img *img, int x, int y, unsigned char *row)
-{
-	unsigned int color;
-
-	color = *(unsigned int*)(img->addr + (y * img->line_length + x * \
-	(img->bits_per_pixel / 8)));
-	*row++ = (color & (0xFF));
-	*row++ = (color & (0xFF << 8)) >> 8;
-	*row++ = (color & (0xFF << 16)) >> 16;
-	*row++ = 0x00;
 }
 
 int		write_image_to_bmp(int fd, t_img *img, t_reso *reso)
@@ -137,10 +76,61 @@ int		write_image_to_bmp(int fd, t_img *img, t_reso *reso)
 		}
 		if (write(fd, buf, img->line_length) == ERROR)
 		{
-			safe_free(buf);
+			SAFE_FREE(buf);
 			return (ERROR);
 		}
 	}
-	safe_free(buf);
+	SAFE_FREE(buf);
 	return (END);
+}
+
+void	set_header(t_file *file, t_info *info, t_img *img, t_reso *reso)
+{
+	file->filesize = DEFAULT_HEADER_SIZE + img->line_length * reso->height;
+	file->reserved = 0;
+	file->offbits = DEFAULT_HEADER_SIZE;
+	info->infosize = INFO_HEADER_SIZE;
+	info->img_width = reso->width;
+	info->img_height = reso->height;
+	info->planes = 1;
+	info->bitcount = img->bits_per_pixel;
+	info->compression = 0;
+	info->sizeimage = img->line_length * reso->height;
+	info->pixpermeter_x = 0;
+	info->pixpermeter_y = 0;
+	info->colorused = 0;
+	info->colorimp = 0;
+}
+
+char	*get_path(\
+	char *new_path, char *filepath, size_t index, const char *new_extension)
+{
+	char			*new_file;
+	char			*file_name;
+	char			*offset;
+	char			*index_name;
+	size_t			len;
+
+	if ((index_name = ft_itoa(index)) == NULL)
+		return (NULL);
+	if ((new_path = ft_strjoin(new_path, index_name)) == NULL)
+	{
+		SAFE_FREE(index_name);
+		return (NULL);
+	}
+	file_name = ft_strrchr(filepath, '/');
+	file_name = (file_name == NULL ? filepath : file_name + 1);
+	offset = ft_strrchr(file_name, '.');
+	offset = (offset == NULL ? NULL : offset);
+	len = ft_strlen(new_path) + ft_strlen(file_name) \
+	- ft_strlen(offset) + ft_strlen(new_extension) + 1;
+	if ((new_file = malloc(len)) == NULL)
+		return (NULL);
+	ft_strlcpy(new_file, new_path, len);
+	ft_strlcat(new_file, file_name, len);
+	ft_strlcpy(new_file + ft_strlen(new_file) \
+	- ft_strlen(offset), new_extension, len);
+	SAFE_FREE(new_path);
+	SAFE_FREE(index_name);
+	return (new_file);
 }

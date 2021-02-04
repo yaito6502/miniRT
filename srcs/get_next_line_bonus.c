@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/29 02:33:58 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/27 05:19:15 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/04 23:53:12 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ int		readline(int fd, char **line)
 
 	if ((buf = malloc(BUFFER_SIZE + 1)) == NULL)
 		return (ERROR);
-	while ((rdbyte = read(fd, buf, BUFFER_SIZE)) > END)
+	while ((rdbyte = read(fd, buf, BUFFER_SIZE)) >= READ)
 	{
 		buf[rdbyte] = '\0';
 		if (*line)
@@ -76,7 +76,7 @@ int		get_next_line(int fd, char **line)
 	*line = s_buf[fd];
 	if (!*line || !ft_strchr(*line, '\n'))
 	{
-		if ((result = readline(fd, line)) <= ERROR)
+		if ((result = readline(fd, line)) == ERROR)
 		{
 			SAFE_FREE(*line);
 			return (ERROR);

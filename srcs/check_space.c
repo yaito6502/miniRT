@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/05 05:05:14 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/23 23:20:28 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/03 22:50:20 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@ void	resolution_check(char **params)
 {
 	if (get_memcount(params) != RESO_MEMCOUNT)
 		error("Does not follow the input format [R [>0] [>0] ]");
-	if (!(ISRANGE(ft_atoi(params[1]), 0, INT_MAX) &&
-	ISRANGE(ft_atoi(params[2]), 0, INT_MAX)))
+	if (!(ISRANGE(ft_atoi(params[1]), 1, INT_MAX) &&
+	ISRANGE(ft_atoi(params[2]), 1, INT_MAX)))
 		error("Does not follow the input format [R [>0] [>0] ]");
 }
 

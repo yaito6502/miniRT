@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/02 12:03:55 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/27 02:10:21 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/03 23:31:56 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,4 +60,28 @@ void	set_color(t_rgb *color, char *params)
 	color->g = ft_atoi(rgb[1]);
 	color->b = ft_atoi(rgb[2]);
 	free_params(rgb);
+}
+
+void	set_screen_base(t_cam *cam, t_reso *reso)
+{
+	double aspect;
+	double half_h;
+	double half_w;
+	t_vec3 basis[3];
+
+	aspect = (double)reso->width / reso->height;
+	half_w = tan(RADIANS(cam->fov) / 2.0);
+	half_h = half_w / aspect;
+	basis[2] = cam->unit_vec;
+	basis[0] = vec3_cross(VUP, basis[2]);
+	if (vec3_length(basis[0]) == 0)
+		basis[0] = vec3_cross(vec3_new(0, 0, 1), basis[2]);
+	basis[1] = vec3_cross(basis[0], basis[2]);
+	cam->u = vec3_tonum_fourope(basis[0], '*', 2.0 * half_w);
+	cam->v = vec3_tonum_fourope(basis[1], '*', 2.0 * half_h);
+	cam->w = vec3_tovec3_fourope(cam->view, '-', \
+	vec3_tonum_fourope(cam->u, '/', 2.0));
+	cam->w = vec3_tovec3_fourope(cam->w, '-', \
+	vec3_tonum_fourope(cam->v, '/', 2.0));
+	cam->w = vec3_tovec3_fourope(cam->w, '+', basis[2]);
 }

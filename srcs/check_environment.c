@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/21 03:59:13 by yaito             #+#    #+#             */
-/*   Updated: 2021/01/27 05:06:47 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/03 22:52:36 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	environment_check(t_env *env, char **params)
 {
 	if (!*params)
 		return ;
-	if (!ft_strncmp(*params, "R", 2))
+	if (!ft_strncmp(*params, "R", 2) && ++env->count.r)
 		resolution_check(params);
 	else if (!ft_strncmp(*params, "A", 2))
 		ambientlight_check(params);
@@ -86,10 +86,10 @@ void	free_params(char **params)
 	i = 0;
 	while (params[i] != NULL)
 	{
-		safe_free(params[i]);
+		SAFE_FREE(params[i]);
 		i++;
 	}
-	safe_free(params);
+	SAFE_FREE(params);
 }
 
 size_t	get_memcount(char **params)
