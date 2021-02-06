@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/21 04:05:52 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/03 23:35:54 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/06 20:01:33 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,33 +41,41 @@ void	init_environment(t_env *env, t_mlxptr *mlx)
 		error(strerror(errno));
 }
 
-void	set_mlx(t_mlxptr *mlx, t_env *env)
+void	display(t_env *env, t_mlxptr *mlx)
 {
-	int		x;
-	int		y;
-	size_t	cam_index;
-	t_img	*img;
-
-	if ((mlx->mlx = mlx_init()) == NULL)
-		error("failed mlx setting");
-	mlx->cam_length = env->count.c;
-	mlx->index = 0;
-	mlx_get_screen_size(mlx->mlx, &x, &y);
-	env->resolution.width = MIN(x, env->resolution.width);
-	env->resolution.height = MIN(y, env->resolution.height);
-	cam_index = 0;
-	while (cam_index < env->count.c)
+	mlx->window = mlx_new_window(\
+		mlx->mlx, env->resolution.width, env->resolution.height, "miniRT");
+	if (mlx->cam_length != 0)
 	{
-		img = &env->img[cam_index];
-		img->img = mlx_new_image(\
-			mlx->mlx, env->resolution.width, env->resolution.height);
-		img->addr = mlx_get_data_addr(\
-			img->img, &img->bits_per_pixel, &img->line_length, &img->endian);
-		if (!img->img || !img->addr)
-			error("failed img setting");
-		mlx->imgs[cam_index] = &env->img[cam_index];
-		cam_index++;
+		mlx_put_image_to_window(mlx->mlx, mlx->window, env->img[0].img, 0, 0);
+		mlx_hook(mlx->window, FOCUSIN, FOCUSCHANGEMASK, rewrite, mlx);
 	}
+	mlx_hook(mlx->window, KEYPRESS, KEYPRESSMASK, recieve_entry, mlx);
+	mlx_hook(mlx->window, CLIENTMESSAGE, STRUCTURENOTIFYMASK, escape, mlx);
+	mlx_loop(mlx->mlx);
+}
+
+void	readrtfile(char *filename, t_env *env, void (*set)(t_env *, char **))
+{
+	int		fd;
+	int		result;
+	char	*line;
+	char	**params;
+
+	if ((fd = open(filename, O_RDONLY)) == ERROR)
+		error(strerror(errno));
+	result = READ;
+	line = NULL;
+	while (result && ((result = get_next_line(fd, &line)) || 1))
+	{
+		if (result == ERROR || \
+		((params = ft_split_multi(line, " \t\v\f\r"))) == NULL)
+			error(strerror(errno));
+		(*set)(env, params);
+		free_params(params);
+		safe_free(line);
+	}
+	close(fd);
 }
 
 int		main(int argc, char **argv)
@@ -75,13 +83,13 @@ int		main(int argc, char **argv)
 	static t_mlxptr	mlx;
 	static t_env	env = {0};
 
-	if (argc <= 1 || argc >= 4 || !ENDSWITH(argv[1], ".rt"))
+	if (argc <= 1 || argc >= 4 || !endswith(argv[1], ".rt"))
 		error("Does not follow the input format [./miniRT *.rt]");
 	if (argc == 3 && ft_strncmp(argv[2], "--save", 7))
 		error("Does not follow the input format [./miniRT *.rt --save]");
 	readrtfile(argv[1], &env, &environment_check);
 	if (env.count.r == 0)
-		error("R option is nessary");
+		error("R option is required");
 	init_environment(&env, &mlx);
 	readrtfile(argv[1], &env, &set_environment);
 	set_mlx(&mlx, &env);
@@ -89,17 +97,6 @@ int		main(int argc, char **argv)
 	if (argc == 3)
 		write_bmpfile_iterate(&env, argv[1]);
 	else
-	{
-		mlx.window = mlx_new_window(\
-			mlx.mlx, env.resolution.width, env.resolution.height, "miniRT");
-		if (env.count.c != 0)
-		{
-			mlx_put_image_to_window(mlx.mlx, mlx.window, env.img[0].img, 0, 0);
-			mlx_hook(mlx.window, FOCUSIN, FOCUSCHANGEMASK, rewrite, &mlx);
-		}
-		mlx_hook(mlx.window, KEYPRESS, KEYPRESSMASK, recieve_entry, &mlx);
-		mlx_hook(mlx.window, CLIENTMESSAGE, STRUCTURENOTIFYMASK, escape, &mlx);
-		mlx_loop(mlx.mlx);
-	}
+		display(&env, &mlx);
 	return (0);
 }

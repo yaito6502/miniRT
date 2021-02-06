@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/02 12:03:55 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/03 23:31:56 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/06 19:55:34 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	set_environment(t_env *env, char **params)
 	if (!ft_strncmp(*params, "R", 2))
 		set_resolution(&env->resolution, params);
 	else if (!ft_strncmp(*params, "A", 2))
-		set_ambientlight(&env->ambientlight, params);
+		set_ambientlight(&env->amb, params);
 	else if (!ft_strncmp(*params, "c", 2))
 		set_camera(&env->camera[c[0]++], params);
 	else if (!ft_strncmp(*params, "l", 2))
@@ -70,10 +70,10 @@ void	set_screen_base(t_cam *cam, t_reso *reso)
 	t_vec3 basis[3];
 
 	aspect = (double)reso->width / reso->height;
-	half_w = tan(RADIANS(cam->fov) / 2.0);
+	half_w = tan(cam->fov * M_PI / 180.0 / 2.0);
 	half_h = half_w / aspect;
 	basis[2] = cam->unit_vec;
-	basis[0] = vec3_cross(VUP, basis[2]);
+	basis[0] = vec3_cross(vec3_new(0, 1, 0), basis[2]);
 	if (vec3_length(basis[0]) == 0)
 		basis[0] = vec3_cross(vec3_new(0, 0, 1), basis[2]);
 	basis[1] = vec3_cross(basis[0], basis[2]);
@@ -84,4 +84,33 @@ void	set_screen_base(t_cam *cam, t_reso *reso)
 	cam->w = vec3_tovec3_fourope(cam->w, '-', \
 	vec3_tonum_fourope(cam->v, '/', 2.0));
 	cam->w = vec3_tovec3_fourope(cam->w, '+', basis[2]);
+}
+
+void	set_mlx(t_mlxptr *mlx, t_env *env)
+{
+	int		x;
+	int		y;
+	size_t	cam_index;
+	t_img	*img;
+
+	if ((mlx->mlx = mlx_init()) == NULL)
+		error("failed mlx setting");
+	mlx->cam_length = env->count.c;
+	mlx->index = 0;
+	mlx_get_screen_size(mlx->mlx, &x, &y);
+	env->resolution.width = min(x, env->resolution.width);
+	env->resolution.height = min(y, env->resolution.height);
+	cam_index = 0;
+	while (cam_index < env->count.c)
+	{
+		img = &env->img[cam_index];
+		img->img = mlx_new_image(\
+			mlx->mlx, env->resolution.width, env->resolution.height);
+		img->addr = mlx_get_data_addr(\
+			img->img, &img->bits_per_pixel, &img->line_length, &img->endian);
+		if (!img->img || !img->addr)
+			error("failed img setting");
+		mlx->imgs[cam_index] = &env->img[cam_index];
+		cam_index++;
+	}
 }

@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/25 15:25:39 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/03 23:44:51 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/06 18:00:12 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,17 +39,15 @@ void	write_bmpfile(\
 	if ((bmp_file = get_path(\
 		"./bmp_files/", (char*)filename, index, ".bmp")) == NULL)
 		error(strerror(errno));
-	if ((fd = open(bmp_file, O_WRONLY | O_CREAT, S_IREAD | S_IWRITE)) == ERROR)
+	fd = open(bmp_file, O_WRONLY | O_CREAT, S_IREAD | S_IWRITE);
+	safe_free(bmp_file);
+	if (fd == ERROR)
 		error(strerror(errno));
-	SAFE_FREE(bmp_file);
 	header_buf[0] = 0x42;
 	header_buf[1] = 0x4D;
 	set_header(file, info, img, reso);
 	if (write(fd, header_buf, DEFAULT_HEADER_SIZE) == ERROR)
-	{
-		close(fd);
 		error(strerror(errno));
-	}
 	if (write_image_to_bmp(fd, img, reso) == ERROR)
 		error(strerror(errno));
 	close(fd);
@@ -76,11 +74,11 @@ int		write_image_to_bmp(int fd, t_img *img, t_reso *reso)
 		}
 		if (write(fd, buf, img->line_length) == ERROR)
 		{
-			SAFE_FREE(buf);
+			safe_free(buf);
 			return (ERROR);
 		}
 	}
-	SAFE_FREE(buf);
+	safe_free(buf);
 	return (END);
 }
 
@@ -111,17 +109,13 @@ char	*get_path(\
 	char			*index_name;
 	size_t			len;
 
-	if ((index_name = ft_itoa(index)) == NULL)
-		return (NULL);
+	index_name = ft_itoa(index);
 	if ((new_path = ft_strjoin(new_path, index_name)) == NULL)
-	{
-		SAFE_FREE(index_name);
 		return (NULL);
-	}
 	file_name = ft_strrchr(filepath, '/');
 	file_name = (file_name == NULL ? filepath : file_name + 1);
 	offset = ft_strrchr(file_name, '.');
-	offset = (offset == NULL ? NULL : offset);
+	offset = (offset == NULL ? ft_strrchr(file_name, '\0') : offset);
 	len = ft_strlen(new_path) + ft_strlen(file_name) \
 	- ft_strlen(offset) + ft_strlen(new_extension) + 1;
 	if ((new_file = malloc(len)) == NULL)
@@ -130,7 +124,7 @@ char	*get_path(\
 	ft_strlcat(new_file, file_name, len);
 	ft_strlcpy(new_file + ft_strlen(new_file) \
 	- ft_strlen(offset), new_extension, len);
-	SAFE_FREE(new_path);
-	SAFE_FREE(index_name);
+	safe_free(new_path);
+	safe_free(index_name);
 	return (new_file);
 }

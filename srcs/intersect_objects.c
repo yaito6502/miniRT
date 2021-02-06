@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/21 21:47:23 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/03 23:49:33 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/06 20:01:20 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,12 +85,12 @@ void	intersect_cylinder(t_cy *cy, t_ray *ray, t_hit *hit)
 	double	abcd[4];
 	double	t[3];
 	t_vec3	cross[2];
-	t_vec3	p_c;
 
 	cross[0] = vec3_cross(ray->direction, cy->unit_vec);
 	if (vec3_length(cross[0]) == 0)
 		return ;
-	cross[1] = vec3_cross(vec3_tovec3_fourope(ray->origin, '-', cy->pos), cy->unit_vec);
+	cross[1] = vec3_cross(vec3_tovec3_fourope(\
+		ray->origin, '-', cy->pos), cy->unit_vec);
 	abcd[0] = pow(vec3_length(cross[0]), 2);
 	abcd[1] = 2 * vec3_dot(cross[0], cross[1]);
 	abcd[2] = pow(vec3_length(cross[1]), 2) - pow(cy->diameter / 2, 2);
@@ -99,23 +99,9 @@ void	intersect_cylinder(t_cy *cy, t_ray *ray, t_hit *hit)
 		return ;
 	t[0] = (-abcd[1] - sqrt(abcd[3])) / (2 * abcd[0]);
 	t[1] = (-abcd[1] + sqrt(abcd[3])) / (2 * abcd[0]);
-	if (ISRANGE(vec3_dot(vec3_tovec3_fourope(get_ray_at(ray, t[0]), '-', cy->pos), cy->unit_vec), 0, cy->height) && t[0] > 0 && hit->t > t[0])
-	{
-		p_c = vec3_tovec3_fourope(get_ray_at(ray, t[0]), '-', cy->pos);
-		hit->normal = vec3_tovec3_fourope(p_c, '-', vec3_tonum_fourope(cy->unit_vec, '*', vec3_dot(p_c, cy->unit_vec)));
-		hit->normal = vec3_normalize(hit->normal);
-		hit->t = t[0];
-	}
-	else if (ISRANGE(vec3_dot(vec3_tovec3_fourope(get_ray_at(ray, t[1]), '-', cy->pos), cy->unit_vec), 0, cy->height) && t[1] > 0 && hit->t > t[1])
-	{
-		p_c = vec3_tovec3_fourope(get_ray_at(ray, t[1]), '-', cy->pos);
-		hit->normal = vec3_tovec3_fourope(get_ray_at(ray, t[1]), '-', vec3_tonum_fourope(cy->unit_vec, '*', vec3_dot(p_c, cy->unit_vec)));
-		hit->normal = vec3_tonum_fourope(vec3_normalize(hit->normal), '/', -1);
-		hit->t = t[1];
-	}
-	else
-		return ;
-	hit->color = cy->color;
+	intersect_cylinder_normal(cy, ray, hit, t[0]);
+	if (intersect_cylinder_normal(cy, ray, hit, t[1]))
+		hit->normal = vec3_tonum_fourope(hit->normal, '/', -1);
 }
 
 void	intersect_triangle(t_tr *tr, t_ray *ray, t_hit *hit)
@@ -127,16 +113,19 @@ void	intersect_triangle(t_tr *tr, t_ray *ray, t_hit *hit)
 
 	abc[0] = vec3_tovec3_fourope(tr->second, '-', tr->first);
 	abc[1] = vec3_tovec3_fourope(tr->third, '-', tr->second);
-	abc[2] = vec3_tovec3_fourope(tr->first, '-', tr->third);
-	normal = vec3_cross(abc[1], abc[0]);
-	normal = vec3_normalize(normal);
+	normal = vec3_normalize(vec3_cross(abc[1], abc[0]));
 	t = orthogonal(&normal, &tr->first, ray, hit->t);
 	if (t == hit->t)
 		return ;
-	p_abc[0] = vec3_cross(vec3_tovec3_fourope(get_ray_at(ray, t), '-', tr->first), abc[0]);
-	p_abc[1] = vec3_cross(vec3_tovec3_fourope(get_ray_at(ray, t), '-', tr->second), abc[1]);
-	p_abc[2] = vec3_cross(vec3_tovec3_fourope(get_ray_at(ray, t), '-', tr->third), abc[2]);
-	if ((vec3_dot(normal, p_abc[0]) > 0 && vec3_dot(normal, p_abc[1]) > 0 && vec3_dot(normal, p_abc[2]) > 0) || (vec3_dot(normal, p_abc[0]) < 0 && vec3_dot(normal, p_abc[1]) < 0 && vec3_dot(normal, p_abc[2]) < 0))
+	p_abc[0] = vec3_cross(vec3_tovec3_fourope(get_ray_at(ray, t), \
+	'-', tr->first), abc[0]);
+	p_abc[1] = vec3_cross(vec3_tovec3_fourope(get_ray_at(ray, t), \
+	'-', tr->second), abc[1]);
+	p_abc[2] = vec3_cross(vec3_tovec3_fourope(get_ray_at(ray, t), \
+	'-', tr->third), vec3_tovec3_fourope(tr->first, '-', tr->third));
+	if ((vec3_dot(normal, p_abc[0]) > 0 && vec3_dot(normal, p_abc[1]) > 0 && \
+	vec3_dot(normal, p_abc[2]) > 0) || (vec3_dot(normal, p_abc[0]) < 0 && \
+	vec3_dot(normal, p_abc[1]) < 0 && vec3_dot(normal, p_abc[2]) < 0))
 	{
 		hit->color = tr->color;
 		hit->t = t;

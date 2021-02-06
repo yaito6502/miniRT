@@ -1,39 +1,39 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_split.c                                         :+:      :+:    :+:   */
+/*   ft_split_multi.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/07 20:22:07 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/06 17:30:14 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/06 18:28:15 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "../includes/minirt.h"
 
-static	size_t	ft_strclen(char const *s, char c)
+static	size_t	ft_strclen(char const *s, char *div)
 {
 	size_t i;
 
 	i = 0;
-	while (s[i] && s[i] != c)
+	while (s[i] && !ft_strchr(div, s[i]))
 		i++;
 	return (i);
 }
 
-static size_t	culcwordslen(char const *s, char c)
+static size_t	culcwordslen(char const *s, char *div)
 {
 	size_t wordslen;
 
 	wordslen = 0;
 	while (*s)
 	{
-		while (*s == c)
+		while (ft_strchr(div, *s))
 			s++;
 		if (!*s)
 			break ;
-		s += ft_strclen(s, c);
+		s += ft_strclen(s, div);
 		wordslen++;
 	}
 	return (wordslen);
@@ -50,7 +50,7 @@ static	void	*clear(char **words, int i)
 	return (NULL);
 }
 
-char			**ft_split(char const *s, char c)
+char			**ft_split_multi(char const *s, char *div)
 {
 	size_t	wordslen;
 	size_t	len;
@@ -59,15 +59,15 @@ char			**ft_split(char const *s, char c)
 
 	if (!s)
 		return (NULL);
-	wordslen = culcwordslen(s, c);
+	wordslen = culcwordslen(s, div);
 	if ((words = (char **)malloc(sizeof(char *) * (wordslen + 1))) == NULL)
 		return (NULL);
 	i = 0;
 	while (wordslen--)
 	{
-		while (*s == c)
+		while (ft_strchr(div, *s))
 			s++;
-		len = ft_strclen(s, c);
+		len = ft_strclen(s, div);
 		if ((words[i] = malloc(len + 1)) == NULL)
 			return (clear(words, i));
 		ft_strlcpy(words[i], s, len + 1);

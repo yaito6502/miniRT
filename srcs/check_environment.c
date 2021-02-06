@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/21 03:59:13 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/03 22:52:36 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/06 18:29:23 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,14 +51,15 @@ void	vector3_check(char *param, bool isunit)
 		error("Does not follow the input format [x, y, z]");
 	if (isunit)
 	{
-		if (!(ISRANGE_UNIT(ft_atof(vec3[0])) &&
-		ISRANGE_UNIT(ft_atof(vec3[1])) && ISRANGE_UNIT(ft_atof(vec3[2]))))
+		if (!(isrange(ft_atof(vec3[0]), -1, 1) && \
+		isrange(ft_atof(vec3[1]), -1, 1) && isrange(ft_atof(vec3[2]), -1, 1)))
 			error("Does not follow the input format [-1:1],[-1:1],[-1:1]");
 	}
 	else
 	{
-		if (!(ISRANGE_VEC3(ft_atof(vec3[0])) &&
-		ISRANGE_VEC3(ft_atof(vec3[1])) && ISRANGE_VEC3(ft_atof(vec3[2]))))
+		if (!(isrange(ft_atof(vec3[0]), -DBL_MAX, DBL_MAX) && \
+		isrange(ft_atof(vec3[1]), -DBL_MAX, DBL_MAX) && \
+		isrange(ft_atof(vec3[2]), -DBL_MAX, DBL_MAX)))
 			error("Does not follow the input format\
 			[d_min:d_max],[d_min:d_max],[d_min:d_max]");
 	}
@@ -73,8 +74,8 @@ void	rgbcolor_check(char *param)
 		error(strerror(errno));
 	if (get_memcount(rgb) != RGB_MEMCOUNT)
 		error("Does not follow the input format [0-255][0-255][0-255]");
-	if (!(ISRANGE_RGB(ft_atoi(rgb[0])) &&
-	ISRANGE_RGB(ft_atoi(rgb[1])) && ISRANGE_RGB(ft_atoi(rgb[2]))))
+	if (!(isrange(ft_atoi(rgb[0]), 0, 0xFF) && \
+	isrange(ft_atoi(rgb[1]), 0, 0xFF) && isrange(ft_atoi(rgb[2]), 0, 0xFF)))
 		error("Does not follow the input format [0-255][0-255][0-255]");
 	free_params(rgb);
 }
@@ -86,10 +87,10 @@ void	free_params(char **params)
 	i = 0;
 	while (params[i] != NULL)
 	{
-		SAFE_FREE(params[i]);
+		safe_free(params[i]);
 		i++;
 	}
-	SAFE_FREE(params);
+	safe_free(params);
 }
 
 size_t	get_memcount(char **params)

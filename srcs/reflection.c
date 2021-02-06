@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/23 23:30:16 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/03 23:38:10 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/06 18:11:06 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,9 @@
 
 int		convert_rgb_to_color(int r, int g, int b)
 {
-	r = MIN(r, 0xFF);
-	g = MIN(g, 0xFF);
-	b = MIN(b, 0xFF);
+	r = min(r, 0xFF);
+	g = min(g, 0xFF);
+	b = min(b, 0xFF);
 	return (r << 16 | g << 8 | b);
 }
 
@@ -26,7 +26,7 @@ t_rgb	culc_rd(t_light *light, t_hit *hit, t_vec3 *l)
 	double	intensity;
 
 	*l = vec3_normalize(*l);
-	intensity = MAX(vec3_dot(hit->normal, *l), 0);
+	intensity = max(vec3_dot(hit->normal, *l), 0);
 	color.r = light->color.r * light->bright * intensity * hit->color.r / 0xFF;
 	color.g = light->color.g * light->bright * intensity * hit->color.g / 0xFF;
 	color.b = light->color.b * light->bright * intensity * hit->color.b / 0xFF;
@@ -73,18 +73,15 @@ bool	shadowing(t_env *env, t_ray *ray, t_hit *hit, t_vec3 *l)
 
 int		reflection(t_env *env, t_ray *ray, t_hit *hit)
 {
-	size_t	i;
-	t_vec3	l;
-	t_rgb	r_d;
-	t_rgb	r_s;
-	t_rgb	color;
+	size_t			i;
+	t_vec3			l;
+	t_rgb			r_d;
+	t_rgb			r_s;
+	t_rgb			color;
 
-	color.r = env->ambientlight.color.r * env->ambientlight.light * \
-	hit->color.r / 0xFF;
-	color.g = env->ambientlight.color.g * env->ambientlight.light * \
-	hit->color.g / 0xFF;
-	color.b = env->ambientlight.color.b * env->ambientlight.light * \
-	hit->color.b / 0xFF;
+	color.r = env->amb.color.r * env->amb.light * hit->color.r / 0xFF;
+	color.g = env->amb.color.g * env->amb.light * hit->color.g / 0xFF;
+	color.b = env->amb.color.b * env->amb.light * hit->color.b / 0xFF;
 	i = 0;
 	while (env->count.l > i)
 	{

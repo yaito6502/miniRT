@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/10/29 02:33:58 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/04 23:53:12 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/06 04:21:00 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int		buf_split(int rval, char **line, char **buf)
 		rval = ERROR;
 	else if ((store = ft_substr(*line, 0, newlinep - *line)) == NULL)
 		rval = ERROR;
-	SAFE_FREE(*line);
+	safe_free(*line);
 	*line = store;
 	return (rval);
 }
@@ -43,7 +43,7 @@ int		readline(int fd, char **line)
 		if (*line)
 		{
 			dst = ft_strjoin(*line, buf);
-			SAFE_FREE(*line);
+			safe_free(*line);
 			if ((*line = dst) == NULL)
 				return (ERROR);
 		}
@@ -53,32 +53,27 @@ int		readline(int fd, char **line)
 		if (ft_strchr(*line, '\n'))
 			break ;
 	}
-	SAFE_FREE(buf);
+	safe_free(buf);
 	return (rdbyte);
 }
 
 int		get_next_line(int fd, char **line)
 {
 	int			result;
-	static bool	reset_s_buf = false;
 	static char *s_buf[MAX_FD];
 
 	if (!line || fd < 0 || fd >= MAX_FD || BUFFER_SIZE <= 0)
 		return (ERROR);
 	if (read(fd, s_buf[fd], 0) < 0)
 		return (ERROR);
-	if (reset_s_buf)
-	{
-		SAFE_FREE(s_buf[fd]);
-		reset_s_buf = false;
-	}
 	result = READ;
 	*line = s_buf[fd];
+	s_buf[fd] = NULL;
 	if (!*line || !ft_strchr(*line, '\n'))
 	{
 		if ((result = readline(fd, line)) == ERROR)
 		{
-			SAFE_FREE(*line);
+			safe_free(*line);
 			return (ERROR);
 		}
 		if (!*line)
@@ -86,7 +81,5 @@ int		get_next_line(int fd, char **line)
 				return (ERROR);
 	}
 	result = buf_split((result > 0), line, &s_buf[fd]);
-	if (result == END)
-		reset_s_buf = true;
 	return (result);
 }

@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/21 04:02:37 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/05 00:00:48 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/06 19:55:21 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,29 +35,6 @@ double	ft_atof(const char *str)
 		while (ft_isdigit(*++str))
 			integer += (*str - '0') * (decimal *= 0.1);
 	return (integer * sign);
-}
-
-void	readrtfile(char *filename, t_env *env, void (*set)(t_env *, char **))
-{
-	int		fd;
-	int		result;
-	char	*line;
-	char	**params;
-
-	if ((fd = open(filename, O_RDONLY)) == ERROR)
-		error(strerror(errno));
-	result = READ;
-	while (result && ((result = get_next_line(fd, &line)) || 1))
-	{
-		if (result == ERROR || ((params = ft_split(line, ' '))) == NULL)
-			error(strerror(errno));
-		(*set)(env, params);
-		printf("line[%s]\n", line);
-		free_params(params);
-		if (result != END)
-			SAFE_FREE(line);
-	}
-	close(fd);
 }
 
 void	my_mlx_pixel_put(t_img *data, int x, int y, int color)
@@ -93,4 +70,21 @@ double	orthogonal(t_vec3 *base, t_vec3 *pos, t_ray *ray, double hit_t)
 	if (t < 0 || hit_t < t)
 		return (hit_t);
 	return (t);
+}
+
+bool	intersect_cylinder_normal(t_cy *cy, t_ray *ray, t_hit *hit, double t)
+{
+	t_vec3 p_c;
+
+	if (t < 0 || hit->t < t)
+		return (false);
+	if (!isrange(vec3_dot(vec3_tovec3_fourope(
+		get_ray_at(ray, t), '-', cy->pos), cy->unit_vec), 0, cy->height))
+		return (false);
+	p_c = vec3_tovec3_fourope(get_ray_at(ray, t), '-', cy->pos);
+	hit->normal = vec3_normalize(vec3_tovec3_fourope(p_c, '-', \
+	vec3_tonum_fourope(cy->unit_vec, '*', vec3_dot(p_c, cy->unit_vec))));
+	hit->t = t;
+	hit->color = cy->color;
+	return (true);
 }

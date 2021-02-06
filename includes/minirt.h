@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/03 21:23:46 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/04 22:21:50 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/06 19:58:40 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,15 +43,15 @@
 # define BG_R					0
 # define BG_G					0
 # define BG_B					0
-# define SPEC					1
-# define SHININESS				70
+# define SPEC					0.3
+# define SHININESS				20
 # define EPSILON				0.001953125
 # define KEYPRESS				2
 # define FOCUSIN				9
 # define CLIENTMESSAGE			33
-# define KEYPRESSMASK			(1L << 0)
-# define STRUCTURENOTIFYMASK	(1L << 17)
-# define FOCUSCHANGEMASK		(1L << 21)
+# define KEYPRESSMASK			1L
+# define STRUCTURENOTIFYMASK	131072L
+# define FOCUSCHANGEMASK		2097152L
 # define ESC					65307
 # define RT_ARROW				65363
 # define LF_ARROW				65361
@@ -59,22 +59,6 @@
 # define DEFAULT_HEADER_SIZE	54
 # define FILE_HEADER_SIZE		14
 # define INFO_HEADER_SIZE		40
-# define VUP (vec3_new(0, 1, 0))
-# define ISRANGE(VALUE, MIN, MAX) ((VALUE >= MIN) && (VALUE <= MAX))
-# define ISRANGE_RGB(VALUE) (ISRANGE(VALUE, 0, 255))
-# define ISRANGE_RATIO(VALUE) (ISRANGE(VALUE, 0.0, 1.0))
-# define ISRANGE_FOV(VALUE) (ISRANGE(VALUE, 0, 180))
-# define ISRANGE_VEC3(VALUE) (ISRANGE(VALUE, -DBL_MAX, DBL_MAX))
-# define ISRANGE_UNIT(VALUE) (ISRANGE(VALUE, -1, 1))
-# define RADIANS(THETA) (THETA * M_PI / 180.0)
-# define STARTSWITH(STR, STARTS) (!ft_strncmp(STR, STARTS, ft_strlen(STARTS) + 1))
-# define ENDSWITH(S,E) (!ft_strncmp(S+(ft_strlen(S)-ft_strlen(E)),E,ft_strlen(E)+1))
-# define MAX(A, B) ((A > B) ? (A) : (B))
-# define MIN(A, B) ((A > B) ? (B) : (A))
-# define SAFE_FREE(ptr) { \
-    free(ptr); \
-    ptr = NULL; \
-} \
 
 typedef struct		s_vector3
 {
@@ -96,7 +80,7 @@ typedef struct		s_resolution
 	int				height;
 }					t_reso;
 
-typedef struct		s_ambientlightning
+typedef struct		s_ambientlight
 {
 	double			light;
 	t_rgb			color;
@@ -181,7 +165,7 @@ typedef struct		s_objectcount
 typedef	struct		s_environment
 {
 	t_reso			resolution;
-	t_amb			ambientlight;
+	t_amb			amb;
 	t_cam			*camera;
 	t_light			*light;
 	t_sp			*sphere;
@@ -239,7 +223,9 @@ typedef struct		s_bitmap_infoheader
 
 int					error(char *message);
 void				init_environment(t_env *env, t_mlxptr *mlx);
-void				set_mlx(t_mlxptr *mlx, t_env *env);
+void				display(t_env *env, t_mlxptr *mlx);
+void				readrtfile\
+(char *filename, t_env *env, void (*set)(t_env *, char **));
 
 void				environment_check(t_env *env, char **params);
 void				resolution_check(char **params);
@@ -268,6 +254,7 @@ void				set_square(t_sq *square, char **params);
 void				set_cylinder(t_cy *cylinder, char **params);
 void				set_triangle(t_tr *triangle, char **params);
 void				set_screen_base(t_cam *cam, t_reso *reso);
+void				set_mlx(t_mlxptr *mlx, t_env *env);
 
 void				raytrace(t_env *env);
 void				pixel_put(t_env *env, size_t cam_index);
@@ -312,12 +299,20 @@ double				vec3_dot(t_vec3 a, t_vec3 b);
 double				vec3_length(t_vec3 vec);
 
 double				ft_atof(const char *str);
-void				readrtfile\
-(char *filename, t_env *env, void (*set)(t_env *, char **));
-double				orthogonal\
-(t_vec3 *base, t_vec3 *pos, t_ray *ray, double hit_t);
 void				my_mlx_pixel_put(t_img *data, int x, int y, int color);
 void				my_mlx_pixel_write\
 (t_img *img, int x, int y, unsigned char *row);
+double				orthogonal\
+(t_vec3 *base, t_vec3 *pos, t_ray *ray, double hit_t);
+bool				intersect_cylinder_normal\
+(t_cy *cy, t_ray *ray, t_hit *hit, double t);
+
+bool				isrange(double value, double min, double max);
+double				min(double a, double b);
+double				max(double a, double b);
+bool				endswith(char *str, char *end);
+void				safe_free(void *ptr);
+
+char				**ft_split_multi(char const *s, char *div);
 
 #endif
