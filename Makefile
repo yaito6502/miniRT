@@ -30,6 +30,7 @@ all : $(NAME)
 
 $(NAME) : $(OBJS)
 	make -C ./includes/libft
+	chmod +x ./includes/minilibx-linux/configure
 	make -C ./includes/minilibx-linux
 	cp ./includes/libft/libft.a ./
 	cp ./includes/minilibx-linux/libmlx_Linux.a ./
