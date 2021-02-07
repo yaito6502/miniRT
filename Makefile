@@ -24,7 +24,6 @@ OBJS		= $(SRCS:.c=.o)
 CC			= gcc
 CFLAGS		= -Wall -Wextra -Werror
 RM			= rm -f
-DEBUG		= -g -fsanitize=address
 
 all : $(NAME)
 
@@ -34,7 +33,7 @@ $(NAME) : $(OBJS)
 	make -C ./includes/minilibx-linux
 	cp ./includes/libft/libft.a ./
 	cp ./includes/minilibx-linux/libmlx_Linux.a ./
-	$(CC) $(CFLAGS) $(DEBUG) $(OBJS) -L. -lm -lft -lmlx_Linux -lXext -lX11 -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJS) -L. -lm -lft -lmlx_Linux -lXext -lX11 -o $(NAME)
 
 clean :
 	$(RM) $(OBJS) libft.a libmlx_Linux.a
