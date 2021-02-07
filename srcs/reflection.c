@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/23 23:30:16 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/06 18:11:06 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/07 19:50:08 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ bool	shadowing(t_env *env, t_ray *ray, t_hit *hit, t_vec3 *l)
 		get_ray_at(ray, hit->t), '+', vec3_tonum_fourope(*l, '*', EPSILON));
 	ray_shadow.direction = vec3_normalize(*l);
 	diff = vec3_length(*l) - EPSILON;
-	hit_shadow = intersect(env, &ray_shadow, diff);
+	hit_shadow = intersect(env, &ray_shadow, diff, true);
 	if (hit_shadow.t == diff)
 		return (false);
 	return (true);
@@ -87,6 +87,8 @@ int		reflection(t_env *env, t_ray *ray, t_hit *hit)
 	{
 		l = vec3_tovec3_fourope(\
 			env->light[i].point, '-', get_ray_at(ray, hit->t));
+		if (hit->is_plane && vec3_dot(hit->normal, l) < 0)
+			hit->normal = vec3_tonum_fourope(hit->normal, '*', -1);
 		if (shadowing(env, ray, hit, &l) && ++i)
 			continue ;
 		r_d = culc_rd(&env->light[i], hit, &l);

@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/21 21:47:23 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/06 20:01:20 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/07 20:41:24 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,18 +27,17 @@ void	intersect_sphere(t_sp *sphere, t_ray *ray, t_hit *hit)
 		return ;
 	t[0] = (-abcd[1] - sqrt(abcd[3])) / (2 * abcd[0]);
 	t[1] = (-abcd[1] + sqrt(abcd[3])) / (2 * abcd[0]);
-	if (t[0] > 0)
+	if (t[0] > 0 && hit->t > t[0])
 		t[2] = t[0];
-	else if (t[1] > 0)
+	else if (t[1] > 0 && hit->t > t[1])
 		t[2] = t[1];
 	else
-		return ;
-	if (hit->t < t[2])
 		return ;
 	hit->color = sphere->color;
 	hit->t = t[2];
 	hit->normal = vec3_normalize(vec3_tovec3_fourope(\
 		get_ray_at(ray, hit->t), '-', sphere->center));
+	hit->is_plane = false;
 }
 
 void	intersect_plane(t_pl *pl, t_ray *ray, t_hit *hit)
@@ -51,6 +50,7 @@ void	intersect_plane(t_pl *pl, t_ray *ray, t_hit *hit)
 	hit->color = pl->color;
 	hit->t = t;
 	hit->normal = pl->unit_vec;
+	hit->is_plane = true;
 }
 
 void	intersect_square(t_sq *sq, t_ray *ray, t_hit *hit)
@@ -78,6 +78,7 @@ void	intersect_square(t_sq *sq, t_ray *ray, t_hit *hit)
 	hit->color = sq->color;
 	hit->t = t;
 	hit->normal = sq->unit_vec;
+	hit->is_plane = true;
 }
 
 void	intersect_cylinder(t_cy *cy, t_ray *ray, t_hit *hit)
@@ -114,8 +115,7 @@ void	intersect_triangle(t_tr *tr, t_ray *ray, t_hit *hit)
 	abc[0] = vec3_tovec3_fourope(tr->second, '-', tr->first);
 	abc[1] = vec3_tovec3_fourope(tr->third, '-', tr->second);
 	normal = vec3_normalize(vec3_cross(abc[1], abc[0]));
-	t = orthogonal(&normal, &tr->first, ray, hit->t);
-	if (t == hit->t)
+	if ((t = orthogonal(&normal, &tr->first, ray, hit->t)) == hit->t)
 		return ;
 	p_abc[0] = vec3_cross(vec3_tovec3_fourope(get_ray_at(ray, t), \
 	'-', tr->first), abc[0]);
@@ -130,5 +130,6 @@ void	intersect_triangle(t_tr *tr, t_ray *ray, t_hit *hit)
 		hit->color = tr->color;
 		hit->t = t;
 		hit->normal = normal;
+		hit->is_plane = true;
 	}
 }

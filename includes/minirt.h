@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/03 21:23:46 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/06 19:58:40 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/07 20:38:10 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,6 +188,7 @@ typedef struct		s_hit_info
 	t_vec3			normal;
 	t_rgb			color;
 	double			t;
+	bool			is_plane;
 }					t_hit;
 
 typedef struct		s_mlx_pointers
@@ -258,7 +259,8 @@ void				set_mlx(t_mlxptr *mlx, t_env *env);
 
 void				raytrace(t_env *env);
 void				pixel_put(t_env *env, size_t cam_index);
-t_hit				intersect(t_env *env, t_ray *ray, double max_dist);
+t_hit				intersect\
+(t_env *env, t_ray *ray, double max_dist, bool is_once);
 t_ray				get_ray(t_cam *cam, double *x, double *y);
 t_vec3				get_ray_at(t_ray *ray, double t);
 void				intersect_sphere(t_sp *sphere, t_ray *ray, t_hit *hit);

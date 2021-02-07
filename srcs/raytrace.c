@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/23 23:26:17 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/03 23:39:53 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/07 20:39:51 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void	pixel_put(t_env *env, size_t cam_index)
 			uv[0] = (double)x / env->resolution.width;
 			uv[1] = (double)y / env->resolution.height;
 			ray = get_ray(&env->camera[cam_index], &uv[0], &uv[1]);
-			hit = intersect(env, &ray, DBL_MAX);
+			hit = intersect(env, &ray, DBL_MAX, false);
 			if (hit.t == DBL_MAX)
 				my_mlx_pixel_put(&env->img[cam_index], x++, y, \
 				convert_rgb_to_color(BG_R, BG_G, BG_B));
@@ -54,26 +54,26 @@ void	pixel_put(t_env *env, size_t cam_index)
 	}
 }
 
-t_hit	intersect(t_env *env, t_ray *ray, double max_dist)
+t_hit	intersect(t_env *env, t_ray *ray, double max_dist, bool is_once)
 {
 	t_hit	hit;
 	size_t	i;
 
 	hit.t = max_dist;
 	i = 0;
-	while (env->count.sp > i)
+	while (env->count.sp > i && (hit.t == max_dist || !is_once))
 		intersect_sphere(&env->sphere[i++], ray, &hit);
 	i = 0;
-	while (env->count.pl > i)
+	while (env->count.pl > i && (hit.t == max_dist || !is_once))
 		intersect_plane(&env->plane[i++], ray, &hit);
 	i = 0;
-	while (env->count.sq > i)
+	while (env->count.sq > i && (hit.t == max_dist || !is_once))
 		intersect_square(&env->square[i++], ray, &hit);
 	i = 0;
-	while (env->count.cy > i)
+	while (env->count.cy > i && (hit.t == max_dist || !is_once))
 		intersect_cylinder(&env->cylinder[i++], ray, &hit);
 	i = 0;
-	while (env->count.tr > i)
+	while (env->count.tr > i && (hit.t == max_dist || !is_once))
 		intersect_triangle(&env->triangle[i++], ray, &hit);
 	return (hit);
 }

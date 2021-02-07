@@ -6,7 +6,7 @@
 /*   By: yaito <yaito@student.42tokyo.jp>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/01/21 04:02:37 by yaito             #+#    #+#             */
-/*   Updated: 2021/02/06 19:55:21 by yaito            ###   ########.fr       */
+/*   Updated: 2021/02/07 19:48:07 by yaito            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,5 +86,6 @@ bool	intersect_cylinder_normal(t_cy *cy, t_ray *ray, t_hit *hit, double t)
 	vec3_tonum_fourope(cy->unit_vec, '*', vec3_dot(p_c, cy->unit_vec))));
 	hit->t = t;
 	hit->color = cy->color;
+	hit->is_plane = false;
 	return (true);
 }
